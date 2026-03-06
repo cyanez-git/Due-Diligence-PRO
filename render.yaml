@@ -1,0 +1,35 @@
+services:
+  # -------------------------
+  # BACKEND SERVICE (Python)
+  # -------------------------
+  - type: web
+    name: due-diligence-backend
+    env: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: GEMINI_API_KEY
+        sync: false # Deberás configurar este valor de forma manual y segura en el panel de Render
+
+  # -------------------------
+  # FRONTEND SERVICE (React Vite)
+  # -------------------------
+  - type: web
+    name: due-diligence-frontend
+    env: static
+    buildCommand: npm install && npm run build
+    staticPublishPath: dist
+    envVars:
+      - key: VITE_API_URL
+        # Magic variable that auto-points the frontend to the backend service URL created above
+        fromService:
+          type: web
+          name: due-diligence-backend
+          property: host
+
+    # Rutas de fallback para Single Page Applications (React Router)
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
