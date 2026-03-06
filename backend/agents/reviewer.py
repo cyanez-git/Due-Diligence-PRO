@@ -34,7 +34,7 @@ def analyze_and_score(empresa: EmpresaData, research: ResearchData) -> Resultado
 
     # Utilizamos 2.5 Flash o Pro para razonamiento complejo sobre JSONs grandes sin búsqueda web (solo razonamiento)
     response = client.models.generate_content(
-        model='gemini-2.0-flash',
+        model='gemini-1.5-flash',
         contents=prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
