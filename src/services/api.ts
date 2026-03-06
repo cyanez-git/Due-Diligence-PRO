@@ -5,18 +5,9 @@ import type {
     ResultadoDueDiligence
 } from '@/types';
 
-const API_URL = (() => {
-    const envUrl = import.meta.env.VITE_API_URL;
-    if (envUrl) {
-        // Render inyecta solo el host (ej: "due-diligence-backend.onrender.com")
-        // Necesitamos construir la URL completa con protocolo y path
-        const protocol = import.meta.env.VITE_API_PROTOCOL || 'https';
-        const cleanHost = envUrl.replace(/^https?:\/\//, '').replace(/\/+$/, '');
-        return `${protocol}://${cleanHost}/api`;
-    }
-    // Desarrollo local: el proxy de Vite redirige /api → localhost:8000
-    return '/api';
-})();
+// En producción (Render): VITE_API_URL = "https://due-diligence-backend-onpd.onrender.com/api"
+// En desarrollo local: se usa '/api' que el proxy de Vite redirige a localhost:8000
+const API_URL = (import.meta.env.VITE_API_URL || '/api').replace(/\/+$/, '');
 
 // Timeout en milisegundos para las operaciones de IA (2 minutos)
 const RESEARCH_TIMEOUT_MS = 120_000;

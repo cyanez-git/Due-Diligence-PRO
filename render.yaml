@@ -22,13 +22,9 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        # Auto-builds the full backend URL from the Render service host
-        fromService:
-          type: web
-          name: due-diligence-backend
-          property: hostport
-      - key: VITE_API_PROTOCOL
-        value: https
+        # Configurar manualmente en Render Dashboard con la URL pública del backend.
+        # Ejemplo: https://due-diligence-backend-onpd.onrender.com/api
+        sync: false
 
     # Rutas de fallback para Single Page Applications (React Router)
     routes:
