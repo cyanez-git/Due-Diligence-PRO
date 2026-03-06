@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 60" fill="none">
+  <!-- Arrow/Triangle icon -->
+  <g>
+    <!-- Dark blue back triangle -->
+    <polygon points="5,30 30,5 30,55" fill="#1a237e"/>
+    <!-- Medium blue middle triangle -->
+    <polygon points="12,30 35,8 35,52" fill="#1565c0"/>
+    <!-- Bright blue front arrow -->
+    <polygon points="18,30 42,10 42,50" fill="#0d47f5"/>
+    <!-- Small right-pointing arrow tip -->
+    <polygon points="30,30 48,18 48,42" fill="#0040e0"/>
+  </g>
+  <!-- Text "SofreDigital" -->
+  <text x="58" y="42" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="32" fill="#0d47f5">
+    SofreDigital
+  </text>
+</svg>

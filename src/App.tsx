@@ -15,7 +15,6 @@ import {
   CheckCircle2,
   RotateCcw,
   Sparkles,
-  Shield,
   TrendingUp,
   AlertTriangle,
   CreditCard,
@@ -180,9 +179,8 @@ function App() {
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg flex items-center justify-center shadow-lg">
-                <Shield className="w-6 h-6 text-white" />
-              </div>
+              <img src="/sofredigital-logo.svg" alt="SofreDigital" className="h-10" />
+              <div className="h-8 w-px bg-slate-300" />
               <div>
                 <h1 className="text-xl font-bold text-slate-900">Due Diligence Pro</h1>
                 <p className="text-xs text-slate-500">Análisis integral de empresas</p>
@@ -386,9 +384,7 @@ function App() {
                     <CardContent className="p-8">
                       <div className="max-w-3xl mx-auto">
                         <div className="text-center mb-8">
-                          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-800 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <Shield className="w-8 h-8 text-white" />
-                          </div>
+                          <img src="/sofredigital-logo.svg" alt="SofreDigital" className="h-12 mx-auto mb-4" />
                           <h3 className="text-2xl font-bold text-slate-900">
                             Informe de Due Diligence
                           </h3>
@@ -508,8 +504,9 @@ function App() {
       <footer className="bg-white border-t border-slate-200 mt-12">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <p className="text-sm text-slate-500">
-              © 2024 Due Diligence Pro. Todos los derechos reservados.
+            <p className="text-sm text-slate-500 flex items-center gap-2">
+              <img src="/sofredigital-logo.svg" alt="SofreDigital" className="h-5 opacity-60" />
+              © 2025 SofreDigital — Due Diligence Pro. Todos los derechos reservados.
             </p>
             <div className="flex items-center gap-4 text-sm text-slate-500">
               <span className="flex items-center gap-1">
