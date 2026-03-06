@@ -22,11 +22,13 @@ services:
     staticPublishPath: dist
     envVars:
       - key: VITE_API_URL
-        # Magic variable that auto-points the frontend to the backend service URL created above
+        # Auto-builds the full backend URL from the Render service host
         fromService:
           type: web
           name: due-diligence-backend
-          property: host
+          property: hostport
+      - key: VITE_API_PROTOCOL
+        value: https
 
     # Rutas de fallback para Single Page Applications (React Router)
     routes:

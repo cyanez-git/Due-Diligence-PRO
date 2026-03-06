@@ -20,10 +20,20 @@ app = FastAPI(
     version="1.0.0"
 )
 
-# Permitir al Frontend local React (Vite) acceder al API
+# Permitir al Frontend acceder al API — local y producción en Render
+allowed_origins = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+# Agregar la URL de frontend de producción desde variable de entorno (ej: https://due-diligence-frontend.onrender.com)
+frontend_url = os.getenv("FRONTEND_URL")
+if frontend_url:
+    allowed_origins.append(frontend_url)
+
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://127.0.0.1:5173"],
+    allow_origins=allowed_origins,
+    allow_origin_regex=r"https://.*\.onrender\.com",  # Permitir todos los subdominios de Render
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
