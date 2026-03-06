@@ -141,7 +141,16 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
       </CardHeader>
       <CardContent className="p-6">
 
-        <form onSubmit={handleSubmit} className="space-y-6">
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            // Prevenir que "Enter" en cualquier input envíe el formulario accidentalmente
+            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'BUTTON') {
+              e.preventDefault();
+            }
+          }}
+          className="space-y-6"
+        >
           {/* Tipo de Empresa */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Tipo de Empresa *</Label>

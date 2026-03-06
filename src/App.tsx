@@ -23,6 +23,7 @@ import {
 } from 'lucide-react';
 import { EmpresaForm } from '@/sections/EmpresaForm';
 import { ResearchPanel } from '@/sections/ResearchPanel';
+import { ResearchLoadingPanel } from '@/sections/ResearchLoadingPanel';
 import { TablaTemperatura } from '@/sections/TablaTemperatura';
 import { useResearch } from '@/hooks/useResearch';
 import { useDueDiligence } from '@/hooks/useDueDiligence';
@@ -86,6 +87,11 @@ function App() {
     setEmpresa(null);
     setInforme(null);
     window.location.reload();
+  };
+
+  const handleCancelResearch = () => {
+    // Volver al formulario sin perder los datos de empresa
+    setCurrentStep('form');
   };
 
   const handleExportPDF = async () => {
@@ -213,7 +219,14 @@ function App() {
           </div>
         )}
 
-        {/* Step: Research */}
+        {/* Step: Cargando Research */}
+        {currentStep === 'research' && empresa && !researchData && (
+          <ResearchLoadingPanel
+            empresaNombre={empresa.nombre}
+            onCancel={handleCancelResearch}
+          />
+        )}
+
         {currentStep === 'research' && empresa && researchData && (
           <div className="animate-fade-in space-y-6">
             <div className="flex items-center justify-between flex-wrap gap-4">
