@@ -28,7 +28,6 @@ dist-ssr
 .env.*
 !.env.example
 backend/.env
-Doc/
 
 # Python
 __pycache__/
@@ -42,7 +41,8 @@ dist/
 downloads/
 eggs/
 .eggs/
-lib/
+# Only ignore Python lib dirs (not src/lib)
+!src/lib/
 lib64/
 parts/
 sdist/
