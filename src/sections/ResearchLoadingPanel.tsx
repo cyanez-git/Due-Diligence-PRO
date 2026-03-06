@@ -1,11 +1,13 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { X, Globe, Search, Brain, FileText, Building2 } from 'lucide-react';
+import { X, Globe, Search, Brain, FileText, Building2, AlertTriangle, RefreshCw } from 'lucide-react';
 
 interface ResearchLoadingPanelProps {
     empresaNombre: string;
     onCancel: () => void;
+    error?: string | null;
+    onRetry?: () => void;
 }
 
 const ETAPAS = [
@@ -16,23 +18,25 @@ const ETAPAS = [
     { icon: FileText, label: 'Estructurando resultados del Research...', delay: 27000 },
 ];
 
-export function ResearchLoadingPanel({ empresaNombre, onCancel }: ResearchLoadingPanelProps) {
+export function ResearchLoadingPanel({ empresaNombre, onCancel, error, onRetry }: ResearchLoadingPanelProps) {
     const [etapaActual, setEtapaActual] = useState(0);
     const [elapsed, setElapsed] = useState(0);
 
-    // Avanzar etapas progresivamente para indicar que la IA está trabajando
+    // Avanzar etapas progresivamente
     useEffect(() => {
+        if (error) return; // Detener si hay error
         const timers = ETAPAS.slice(1).map((etapa, i) =>
             setTimeout(() => setEtapaActual(i + 1), etapa.delay)
         );
         return () => timers.forEach(clearTimeout);
-    }, []);
+    }, [error]);
 
     // Contador de segundos transcurridos
     useEffect(() => {
+        if (error) return;
         const interval = setInterval(() => setElapsed(s => s + 1), 1000);
         return () => clearInterval(interval);
-    }, []);
+    }, [error]);
 
     const formatTime = (secs: number) => {
         const m = Math.floor(secs / 60);
@@ -42,6 +46,54 @@ export function ResearchLoadingPanel({ empresaNombre, onCancel }: ResearchLoadin
 
     const EtapaIcon = ETAPAS[etapaActual].icon;
 
+    // --- ESTADO DE ERROR ---
+    if (error) {
+        return (
+            <div className="animate-fade-in flex flex-col items-center justify-center py-12 px-4">
+                <Card className="w-full max-w-lg shadow-xl border-0">
+                    <CardContent className="p-8">
+                        <div className="flex flex-col items-center text-center mb-6">
+                            <div className="w-20 h-20 bg-red-100 rounded-full flex items-center justify-center mb-4">
+                                <AlertTriangle className="w-10 h-10 text-red-500" />
+                            </div>
+                            <h3 className="text-xl font-bold text-slate-900 mb-2">
+                                Error en el Research
+                            </h3>
+                            <p className="text-sm text-slate-500 leading-relaxed bg-slate-50 p-4 rounded-lg border text-left">
+                                {error}
+                            </p>
+                        </div>
+
+                        <div className="flex gap-3 justify-center">
+                            {onRetry && (
+                                <Button
+                                    onClick={onRetry}
+                                    className="bg-blue-600 hover:bg-blue-700 flex items-center gap-2"
+                                >
+                                    <RefreshCw className="w-4 h-4" />
+                                    Reintentar
+                                </Button>
+                            )}
+                            <Button
+                                variant="outline"
+                                onClick={onCancel}
+                                className="flex items-center gap-2"
+                            >
+                                <X className="w-4 h-4" />
+                                Volver al formulario
+                            </Button>
+                        </div>
+
+                        <p className="text-xs text-slate-400 text-center mt-4">
+                            Si el error persiste, puede deberse a que el servidor está iniciando. Espere 30 segundos y reintente.
+                        </p>
+                    </CardContent>
+                </Card>
+            </div>
+        );
+    }
+
+    // --- ESTADO DE CARGA ---
     return (
         <div className="animate-fade-in flex flex-col items-center justify-center py-12 px-4">
             <Card className="w-full max-w-lg shadow-xl border-0">
@@ -49,11 +101,8 @@ export function ResearchLoadingPanel({ empresaNombre, onCancel }: ResearchLoadin
                     {/* Círculo animado central */}
                     <div className="flex flex-col items-center mb-8">
                         <div className="relative mb-6">
-                            {/* Anillo exterior pulsante */}
                             <div className="w-28 h-28 border-4 border-blue-100 rounded-full absolute inset-0 animate-ping opacity-30" />
-                            {/* Anillo spinner */}
                             <div className="w-28 h-28 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin" />
-                            {/* Ícono central */}
                             <div className="absolute inset-0 flex items-center justify-center">
                                 <div className="w-16 h-16 bg-gradient-to-br from-blue-500 to-blue-700 rounded-full flex items-center justify-center shadow-lg">
                                     <EtapaIcon className="w-7 h-7 text-white" />
@@ -124,7 +173,7 @@ export function ResearchLoadingPanel({ empresaNombre, onCancel }: ResearchLoadin
             </Card>
 
             <p className="text-xs text-slate-400 mt-4 text-center max-w-md">
-                Este proceso puede tomar entre 15 y 45 segundos dependiendo de la cantidad de información disponible en internet.
+                Este proceso puede tomar entre 15 y 90 segundos dependiendo de la cantidad de información disponible en internet.
             </p>
         </div>
     );

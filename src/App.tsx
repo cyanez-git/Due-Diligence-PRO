@@ -38,7 +38,7 @@ function App() {
   const [empresa, setEmpresa] = useState<EmpresaData | null>(null);
   const [informe, setInforme] = useState<InformeCompleto | null>(null);
 
-  const { realizarResearch, buscarPorCuit, loading: loadingResearch, data: researchData } = useResearch();
+  const { realizarResearch, buscarPorCuit, loading: loadingResearch, error: researchError, data: researchData } = useResearch();
   const { analizarDueDiligence } = useDueDiligence();
   const { exportarAPDF, exporting, progress } = useExportPDF();
 
@@ -92,6 +92,20 @@ function App() {
   const handleCancelResearch = () => {
     // Volver al formulario sin perder los datos de empresa
     setCurrentStep('form');
+  };
+
+  const handleRetryResearch = async () => {
+    if (!empresa) return;
+    try {
+      const research = await realizarResearch(empresa);
+      setInforme(prev => ({
+        empresa,
+        research,
+        resultado: prev?.resultado || {} as NonNullable<typeof prev>["resultado"],
+      }));
+    } catch (error) {
+      console.error('Error en reintento de research:', error);
+    }
   };
 
   const handleExportPDF = async () => {
@@ -224,6 +238,8 @@ function App() {
           <ResearchLoadingPanel
             empresaNombre={empresa.nombre}
             onCancel={handleCancelResearch}
+            error={researchError}
+            onRetry={handleRetryResearch}
           />
         )}
 

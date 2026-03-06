@@ -7,11 +7,49 @@ import type {
 
 const API_URL = import.meta.env.VITE_API_URL || '/api';
 
+// Timeout en milisegundos para las operaciones de IA (2 minutos)
+const RESEARCH_TIMEOUT_MS = 120_000;
+const DEFAULT_TIMEOUT_MS = 15_000;
+
+/**
+ * Helper para crear un fetch con timeout vía AbortController.
+ */
+async function fetchWithTimeout(
+    url: string,
+    options: RequestInit = {},
+    timeoutMs: number = DEFAULT_TIMEOUT_MS
+): Promise<Response> {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+
+    try {
+        const response = await fetch(url, { ...options, signal: controller.signal });
+        return response;
+    } catch (err) {
+        if (err instanceof DOMException && err.name === 'AbortError') {
+            throw new Error(
+                `La solicitud tardó más de ${Math.round(timeoutMs / 1000)} segundos. ` +
+                `El servidor puede estar iniciando o con alta carga. Por favor, reintente.`
+            );
+        }
+        throw err;
+    } finally {
+        clearTimeout(timer);
+    }
+}
+
 /**
  * Helper para manejar las respuestas de la API
  */
 async function handleResponse<T>(response: Response): Promise<T> {
     if (!response.ok) {
+        if (response.status === 504) {
+            throw new Error('El servidor tardó demasiado en responder (Gateway Timeout). ' +
+                'Esto puede ocurrir la primera vez que se activa el servicio. Por favor, reintente.');
+        }
+        if (response.status === 503) {
+            throw new Error('El servicio no está disponible en este momento. Por favor, reintente en unos segundos.');
+        }
         const errorText = await response.text().catch(() => 'Error de red desconocido');
         throw new Error(`Error ${response.status}: ${errorText}`);
     }
@@ -20,67 +58,61 @@ async function handleResponse<T>(response: Response): Promise<T> {
 
 /**
  * Busca datos enriquecidos de una empresa usando su CUIT.
- * @param cuit El CUIT de la empresa a buscar.
- * @returns Los datos de la empresa o null si no se encuentran.
  */
 export async function buscarEmpresaPorCuit(cuit: string): Promise<DatosEmpresaEnriquecidos | null> {
     const cuitLimpio = cuit.replace(/\D/g, '');
     if (!cuitLimpio) return null;
 
     try {
-        const response = await fetch(`${API_URL}/empresas/${cuitLimpio}`);
+        const response = await fetchWithTimeout(
+            `${API_URL}/empresas/${cuitLimpio}`,
+            {},
+            DEFAULT_TIMEOUT_MS
+        );
         if (response.status === 404) {
             return null;
         }
         return await handleResponse<DatosEmpresaEnriquecidos>(response);
     } catch (error) {
         console.error('Error buscando empresa por CUIT en la API:', error);
-        throw error;
+        // Para la búsqueda de CUIT, fallamos silenciosamente permitiendo ingreso manual
+        return null;
     }
 }
 
 /**
  * Realiza una investigación exhaustiva sobre una empresa.
- * @param empresa Los datos iniciales de la empresa.
- * @returns El Research estructurado devuelto por la API.
+ * Usa un timeout extendido de 2 minutos para permitir que la IA trabaje.
  */
 export async function realizarResearch(empresa: EmpresaData): Promise<ResearchData> {
-    try {
-        const response = await fetch(`${API_URL}/research`, {
+    const response = await fetchWithTimeout(
+        `${API_URL}/research`,
+        {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ empresa }),
-        });
-        return await handleResponse<ResearchData>(response);
-    } catch (error) {
-        console.error('Error realizando research en la API:', error);
-        throw error;
-    }
+        },
+        RESEARCH_TIMEOUT_MS
+    );
+    return handleResponse<ResearchData>(response);
 }
 
 /**
- * Realiza el análisis de Due Diligence enviando la empresa y su research.
- * @param empresa Los datos de la empresa.
- * @param research El research previamente generado.
- * @returns El resultado del Due Diligence devuelto por la API.
+ * Realiza el análisis de Due Diligence.
+ * Usa un timeout extendido de 2 minutos para el procesamiento de IA.
  */
 export async function analizarDueDiligence(
     empresa: EmpresaData,
     research: ResearchData
 ): Promise<ResultadoDueDiligence> {
-    try {
-        const response = await fetch(`${API_URL}/analyze`, {
+    const response = await fetchWithTimeout(
+        `${API_URL}/analyze`,
+        {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ empresa, research }),
-        });
-        return await handleResponse<ResultadoDueDiligence>(response);
-    } catch (error) {
-        console.error('Error analizando Due Diligence en la API:', error);
-        throw error;
-    }
+        },
+        RESEARCH_TIMEOUT_MS
+    );
+    return handleResponse<ResultadoDueDiligence>(response);
 }
