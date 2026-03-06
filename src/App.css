@@ -1,0 +1,154 @@
+/* Animaciones personalizadas */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+@keyframes pulse-glow {
+  0%, 100% {
+    box-shadow: 0 0 5px currentColor;
+  }
+  50% {
+    box-shadow: 0 0 20px currentColor;
+  }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+.animate-slide-in {
+  animation: slideIn 0.5s ease-out forwards;
+}
+
+/* Estilos de la tabla de temperatura */
+.tabla-temperatura th {
+  background-color: #f8fafc;
+  font-weight: 600;
+  text-transform: uppercase;
+  font-size: 0.75rem;
+  letter-spacing: 0.05em;
+}
+
+.tabla-temperatura tr:hover {
+  background-color: #f1f5f9;
+}
+
+/* Efectos de semáforo */
+.semaforo-circle {
+  transition: all 0.3s ease;
+}
+
+.semaforo-circle:hover {
+  transform: scale(1.2);
+}
+
+/* Gradientes personalizados */
+.gradient-success {
+  background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
+.gradient-warning {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+}
+
+.gradient-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+}
+
+/* Scrollbar personalizada */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f5f9;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
+}
+
+/* Estilos de impresión */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  
+  body {
+    background: white !important;
+  }
+  
+  .card {
+    break-inside: avoid;
+    box-shadow: none !important;
+    border: 1px solid #e2e8f0 !important;
+  }
+}
+
+/* Estilos responsivos adicionales */
+@media (max-width: 640px) {
+  .step-indicator {
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+  
+  .step-indicator .chevron {
+    transform: rotate(90deg);
+  }
+}
+
+/* Transiciones suaves */
+.transition-all-300 {
+  transition: all 0.3s ease;
+}
+
+/* Focus states mejorados */
+input:focus,
+textarea:focus,
+select:focus {
+  outline: none;
+  ring: 2px;
+  ring-color: #3b82f6;
+}
+
+/* Badge de estado personalizado */
+.badge-estado {
+  @apply px-2 py-1 rounded-full text-xs font-medium;
+}
+
+.badge-estado.aprobado {
+  @apply bg-emerald-100 text-emerald-800;
+}
+
+.badge-estado.revisar {
+  @apply bg-amber-100 text-amber-800;
+}
+
+.badge-estado.rechazado {
+  @apply bg-red-100 text-red-800;
+}
