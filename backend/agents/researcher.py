@@ -38,7 +38,7 @@ def investigate_company(cuit: str, nombre: str, sector: str) -> ResearchData:
     
     # PASO 1: Búsqueda con grounding (sin JSON schema — incompatible con tools)
     search_response = client.models.generate_content(
-        model='gemini-1.5-flash',
+        model='gemini-2.5-flash',
         contents=search_prompt,
         config=types.GenerateContentConfig(
             tools=[{"google_search": {}}],
@@ -66,7 +66,7 @@ def investigate_company(cuit: str, nombre: str, sector: str) -> ResearchData:
     """
 
     structured_response = client.models.generate_content(
-        model='gemini-1.5-flash',
+        model='gemini-2.5-flash',
         contents=structure_prompt,
         config=types.GenerateContentConfig(
             response_mime_type="application/json",
