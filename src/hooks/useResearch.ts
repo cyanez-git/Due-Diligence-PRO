@@ -7,11 +7,11 @@ export function useResearch() {
   const [error, setError] = useState<string | null>(null);
   const [data, setData] = useState<ResearchData | null>(null);
 
-  const buscarPorCuit = useCallback(async (cuit: string): Promise<DatosEmpresaEnriquecidos | null> => {
+  const buscarPorCuit = useCallback(async (taxId: string): Promise<DatosEmpresaEnriquecidos | null> => {
     try {
-      return await api.buscarEmpresaPorCuit(cuit);
+      return await api.buscarEmpresaPorId(taxId);
     } catch (err) {
-      console.error('Error buscando por CUIT:', err);
+      console.error('Error buscando por ID fiscal:', err);
       // Return null to allow manual entry if API fails or company is not found
       return null;
     }
@@ -36,3 +36,4 @@ export function useResearch() {
 
   return { realizarResearch, buscarPorCuit, loading, error, data };
 }
+

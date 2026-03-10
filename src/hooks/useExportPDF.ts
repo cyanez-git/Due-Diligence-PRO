@@ -38,7 +38,7 @@ export function useExportPDF() {
       // Agregar portada
       pdf.setFillColor(15, 23, 42);
       pdf.rect(0, 0, pdfWidth, 40, 'F');
-      
+
       pdf.setTextColor(255, 255, 255);
       pdf.setFontSize(20);
       pdf.text('INFORME DE DUE DILIGENCE', pdfWidth / 2, 20, { align: 'center' });
@@ -49,7 +49,7 @@ export function useExportPDF() {
       pdf.setTextColor(0, 0, 0);
       pdf.setFontSize(10);
       let yPos = 50;
-      
+
       pdf.setFontSize(12);
       pdf.setFont('helvetica', 'bold');
       pdf.text('INFORMACIÓN DE LA EMPRESA', 15, yPos);
@@ -57,12 +57,10 @@ export function useExportPDF() {
       yPos += 8;
 
       const infoData = [
-        ['CUIT:', informe.empresa.cuit],
+        ['ID Fiscal:', informe.empresa.identificacionFiscal],
         ['Tipo:', informe.empresa.tipo === 'publica' ? 'Pública' : 'Privada'],
         ['Sector:', informe.empresa.sector],
         ['País:', informe.empresa.pais],
-        ['Empleados:', informe.empresa.empleados || 'No especificado'],
-        ['Año de Fundación:', informe.empresa.fechaFundacion || 'No especificado'],
       ];
 
       infoData.forEach(([label, value]) => {
@@ -81,7 +79,7 @@ export function useExportPDF() {
       yPos += 8;
 
       const { resultado } = informe;
-      
+
       // Puntaje con color
       const porcentaje = resultado.porcentaje;
       let color: [number, number, number];
@@ -98,14 +96,14 @@ export function useExportPDF() {
       pdf.setTextColor(0, 0, 0);
       pdf.setFontSize(11);
       pdf.setFont('helvetica', 'bold');
-      
+
       let recomendacionTexto = '';
       if (resultado.recomendacion === 'aprobado') recomendacionTexto = 'APROBADO';
       else if (resultado.recomendacion === 'condicional') recomendacionTexto = 'APROBADO CON CONDICIONES';
       else recomendacionTexto = 'RECHAZADO';
 
       pdf.text(recomendacionTexto, 50, yPos + 5);
-      
+
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(9);
       pdf.text(`Puntaje: ${resultado.puntajeTotal} / ${resultado.puntajeMaximo} puntos`, 50, yPos + 10);
@@ -169,12 +167,12 @@ export function useExportPDF() {
           pdf.setFontSize(9);
           pdf.setFont('helvetica', 'bold');
           pdf.text(item.item, 28, yPos);
-          
+
           pdf.setFont('helvetica', 'normal');
           pdf.setFontSize(8);
           const descripcionLines = pdf.splitTextToSize(item.descripcion, pdfWidth - 60);
           pdf.text(descripcionLines, 28, yPos + 4);
-          
+
           pdf.setFontSize(8);
           pdf.text(`Puntaje: ${item.puntaje}/10`, pdfWidth - 35, yPos);
 
@@ -207,13 +205,13 @@ export function useExportPDF() {
 
       pdf.setFontSize(9);
       pdf.setFont('helvetica', 'normal');
-      
+
       // Noticias
       pdf.setFont('helvetica', 'bold');
       pdf.text('Noticias Recientes:', 15, yPos);
       yPos += 5;
       pdf.setFont('helvetica', 'normal');
-      
+
       informe.research.noticias.slice(0, 3).forEach((noticia, index) => {
         if (yPos > pdfHeight - 30) {
           pdf.addPage();
@@ -246,7 +244,7 @@ export function useExportPDF() {
           yPos = 20;
         }
         pdf.setFontSize(8);
-        
+
         let riesgoColor: [number, number, number];
         if (riesgo.nivel === 'alto') riesgoColor = [239, 68, 68];
         else if (riesgo.nivel === 'medio') riesgoColor = [245, 158, 11];

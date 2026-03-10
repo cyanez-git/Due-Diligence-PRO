@@ -15,7 +15,7 @@ def analyze_and_score(empresa: EmpresaData, research: ResearchData) -> Resultado
     """
     prompt = f"""
     Eres un analista experto en Due Diligence (Risk & Compliance). 
-    Se ha recolectado la siguiente información de la empresa {empresa.nombre} (CUIT: {empresa.cuit}):
+    Se ha recolectado la siguiente información de la empresa {empresa.nombre} (ID Fiscal: {empresa.identificacionFiscal}, País: {empresa.pais}):
 
     DATOS DE RESEARCH RECOPILADOS:
     {research.model_dump_json(indent=2)}

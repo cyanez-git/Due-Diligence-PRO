@@ -59,15 +59,15 @@ async function handleResponse<T>(response: Response): Promise<T> {
 }
 
 /**
- * Busca datos enriquecidos de una empresa usando su CUIT.
+ * Busca datos enriquecidos de una empresa usando su identificación fiscal.
  */
-export async function buscarEmpresaPorCuit(cuit: string): Promise<DatosEmpresaEnriquecidos | null> {
-    const cuitLimpio = cuit.replace(/\D/g, '');
-    if (!cuitLimpio) return null;
+export async function buscarEmpresaPorId(taxId: string): Promise<DatosEmpresaEnriquecidos | null> {
+    const idLimpio = taxId.replace(/[\s]/g, '');
+    if (!idLimpio) return null;
 
     try {
         const response = await fetchWithTimeout(
-            `${API_URL}/empresas/${cuitLimpio}`,
+            `${API_URL}/empresas/${encodeURIComponent(idLimpio)}`,
             {},
             DEFAULT_TIMEOUT_MS
         );
@@ -76,8 +76,8 @@ export async function buscarEmpresaPorCuit(cuit: string): Promise<DatosEmpresaEn
         }
         return await handleResponse<DatosEmpresaEnriquecidos>(response);
     } catch (error) {
-        console.error('Error buscando empresa por CUIT en la API:', error);
-        // Para la búsqueda de CUIT, fallamos silenciosamente permitiendo ingreso manual
+        console.error('Error buscando empresa por ID fiscal en la API:', error);
+        // Para la búsqueda de ID fiscal, fallamos silenciosamente permitiendo ingreso manual
         return null;
     }
 }

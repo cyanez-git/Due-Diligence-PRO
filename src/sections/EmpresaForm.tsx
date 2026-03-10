@@ -7,11 +7,17 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import {
   Building2,
   Globe,
-  Users,
-  Calendar,
   Briefcase,
   MapPin,
   Search,
@@ -21,8 +27,23 @@ import {
   Loader2,
   AlertCircle,
   Edit3
+
 } from 'lucide-react';
 import type { EmpresaData, DatosEmpresaEnriquecidos } from '@/types';
+
+const PAISES = [
+  { value: 'Argentina', label: 'Argentina', idLabel: 'CUIT/CUIL', idPlaceholder: 'XX-XXXXXXXX-X', idLength: 11 },
+  { value: 'Brasil', label: 'Brasil', idLabel: 'CNPJ', idPlaceholder: 'Ej: 00.000.000/0000-00', idLength: 0 },
+  { value: 'Chile', label: 'Chile', idLabel: 'RUT', idPlaceholder: 'Ej: 12.345.678-9', idLength: 0 },
+  { value: 'Colombia', label: 'Colombia', idLabel: 'NIT', idPlaceholder: 'Ej: 900.123.456-7', idLength: 0 },
+  { value: 'España', label: 'España', idLabel: 'CIF/NIF', idPlaceholder: 'Ej: B12345678', idLength: 0 },
+  { value: 'Estados Unidos', label: 'Estados Unidos', idLabel: 'EIN / Tax ID', idPlaceholder: 'Ej: 12-3456789', idLength: 0 },
+  { value: 'México', label: 'México', idLabel: 'RFC', idPlaceholder: 'Ej: ABC123456AB1', idLength: 0 },
+  { value: 'Paraguay', label: 'Paraguay', idLabel: 'RUC', idPlaceholder: 'Ej: 80012345-6', idLength: 0 },
+  { value: 'Perú', label: 'Perú', idLabel: 'RUC', idPlaceholder: 'Ej: 20123456789', idLength: 0 },
+  { value: 'Uruguay', label: 'Uruguay', idLabel: 'RUT', idPlaceholder: 'Ej: 211234560019', idLength: 0 },
+  { value: 'Otro', label: 'Otro país', idLabel: 'Tax ID / Nº Identificación Fiscal', idPlaceholder: 'Ingrese el identificador fiscal', idLength: 0 },
+];
 
 interface EmpresaFormProps {
   onSubmit: (data: EmpresaData) => void;
@@ -35,86 +56,101 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
   const [formData, setFormData] = useState<EmpresaData>({
     nombre: '',
     tipo: 'privada',
-    cuit: '',
+    identificacionFiscal: '',
     sector: '',
-    pais: '',
-    fechaFundacion: '',
-    empleados: '',
+    pais: 'Argentina',
     sitioWeb: '',
+    sinSitioWeb: false,
     descripcion: '',
   });
 
-  const [buscandoCuit, setBuscandoCuit] = useState(false);
-  const [cuitEncontrado, setCuitEncontrado] = useState(false);
-  const [cuitNoEncontrado, setCuitNoEncontrado] = useState(false);
-  const [errorCuit, setErrorCuit] = useState<string | null>(null);
+  const [buscandoId, setBuscandoId] = useState(false);
+  const [idEncontrado, setIdEncontrado] = useState(false);
+  const [idNoEncontrado, setIdNoEncontrado] = useState(false);
+  const [errorId, setErrorId] = useState<string | null>(null);
   const [datosEditados, setDatosEditados] = useState(false);
+
+  const paisConfig = PAISES.find(p => p.value === formData.pais) || PAISES[PAISES.length - 1];
+  const esArgentina = formData.pais === 'Argentina';
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     onSubmit(formData);
   };
 
-  const handleChange = (field: keyof EmpresaData, value: string) => {
+  const handleChange = (field: keyof EmpresaData, value: string | boolean) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (field === 'cuit') {
-      setCuitEncontrado(false);
-      setCuitNoEncontrado(false);
-      setErrorCuit(null);
+    if (field === 'identificacionFiscal') {
+      setIdEncontrado(false);
+      setIdNoEncontrado(false);
+      setErrorId(null);
       setDatosEditados(false);
-    } else if (cuitEncontrado) {
+    } else if (field === 'pais') {
+      // Reset identification state when country changes
+      setFormData(prev => ({
+        ...prev,
+        pais: value as string,
+        identificacionFiscal: '',
+      }));
+      setIdEncontrado(false);
+      setIdNoEncontrado(false);
+      setErrorId(null);
+      setDatosEditados(false);
+    } else if (idEncontrado) {
       setDatosEditados(true);
     }
   };
 
-  const handleBuscarPorCuit = async () => {
-    if (!formData.cuit || formData.cuit.replace(/\D/g, '').length < 11) {
-      setErrorCuit('Ingrese un CUIT/CUIL válido (11 dígitos)');
+  const handleBuscarPorId = async () => {
+    if (!esArgentina) return;
+
+    const idLimpio = formData.identificacionFiscal.replace(/\D/g, '');
+    if (idLimpio.length < 11) {
+      setErrorId('Ingrese un CUIT/CUIL válido (11 dígitos)');
       return;
     }
 
-    setBuscandoCuit(true);
-    setErrorCuit(null);
-    setCuitEncontrado(false);
-    setCuitNoEncontrado(false);
+    setBuscandoId(true);
+    setErrorId(null);
+    setIdEncontrado(false);
+    setIdNoEncontrado(false);
 
     try {
       if (onBuscarPorCuit) {
-        const datos = await onBuscarPorCuit(formData.cuit);
+        const datos = await onBuscarPorCuit(formData.identificacionFiscal);
         if (datos) {
           setFormData(prev => ({
             ...prev,
             nombre: datos.nombre || prev.nombre,
             sector: datos.sector || prev.sector,
             tipo: datos.tipo || prev.tipo,
-            empleados: datos.empleados || prev.empleados,
-            fechaFundacion: datos.fechaFundacion || prev.fechaFundacion,
             descripcion: datos.descripcion || prev.descripcion,
             pais: datos.sede || prev.pais,
           }));
-          setCuitEncontrado(true);
-          setCuitNoEncontrado(false);
+          setIdEncontrado(true);
+          setIdNoEncontrado(false);
         } else {
-          setCuitNoEncontrado(true);
-          setCuitEncontrado(false);
+          setIdNoEncontrado(true);
+          setIdEncontrado(false);
         }
       }
     } catch {
-      setErrorCuit('Error al buscar datos del CUIT. Intente nuevamente.');
+      setErrorId('Error al buscar datos. Intente nuevamente.');
     } finally {
-      setBuscandoCuit(false);
+      setBuscandoId(false);
     }
   };
 
 
-  // Auto-buscar cuando el CUIT tiene 11 dígitos
+  // Auto-buscar cuando el CUIT tiene 11 dígitos (solo Argentina)
   useEffect(() => {
-    const cuitLimpio = formData.cuit.replace(/\D/g, '');
-    if (cuitLimpio.length === 11 && onBuscarPorCuit && !cuitEncontrado && !buscandoCuit && !cuitNoEncontrado) {
-      handleBuscarPorCuit();
+    if (!esArgentina) return;
+    const idLimpio = formData.identificacionFiscal.replace(/\D/g, '');
+    if (idLimpio.length === 11 && onBuscarPorCuit && !idEncontrado && !buscandoId && !idNoEncontrado) {
+      handleBuscarPorId();
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [formData.cuit]);
+  }, [formData.identificacionFiscal]);
 
   const formatCuit = (value: string) => {
     const numbers = value.replace(/\D/g, '');
@@ -123,9 +159,13 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
     return `${numbers.slice(0, 2)}-${numbers.slice(2, 10)}-${numbers.slice(10, 11)}`;
   };
 
-  const handleCuitChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const formatted = formatCuit(e.target.value);
-    handleChange('cuit', formatted);
+  const handleIdChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (esArgentina) {
+      const formatted = formatCuit(e.target.value);
+      handleChange('identificacionFiscal', formatted);
+    } else {
+      handleChange('identificacionFiscal', e.target.value);
+    }
   };
 
   return (
@@ -136,7 +176,7 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
           Datos de la Empresa
         </CardTitle>
         <CardDescription className="text-slate-300">
-          Ingrese el CUIT para buscar datos. Campos con * son obligatorios.
+          Seleccione el país e ingrese la identificación fiscal para comenzar. Campos con * son obligatorios.
         </CardDescription>
       </CardHeader>
       <CardContent className="p-6">
@@ -151,6 +191,39 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
           }}
           className="space-y-6"
         >
+          {/* País de Operación - PRIMER CAMPO */}
+          <div className="space-y-2">
+            <Label htmlFor="pais" className="flex items-center gap-2 text-base font-semibold">
+              <MapPin className="w-4 h-4" />
+              País de Operación *
+            </Label>
+            <Select
+              value={formData.pais}
+              onValueChange={(value) => handleChange('pais', value)}
+            >
+              <SelectTrigger className="h-11">
+                <SelectValue placeholder="Seleccione un país" />
+              </SelectTrigger>
+              <SelectContent>
+                {PAISES.map((pais) => (
+                  <SelectItem key={pais.value} value={pais.value}>
+                    {pais.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            {esArgentina && (
+              <p className="text-xs text-slate-500">
+                Al seleccionar Argentina, podrá buscar datos automáticamente por CUIT.
+              </p>
+            )}
+            {!esArgentina && (
+              <p className="text-xs text-slate-500">
+                Para empresas fuera de Argentina, deberá completar los datos manualmente.
+              </p>
+            )}
+          </div>
+
           {/* Tipo de Empresa */}
           <div className="space-y-3">
             <Label className="text-base font-semibold">Tipo de Empresa *</Label>
@@ -170,53 +243,56 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
             </RadioGroup>
           </div>
 
-          {/* CUIT - Campo obligatorio */}
+          {/* Identificación Fiscal - Dinámico según país */}
           <div className="space-y-2">
-            <Label htmlFor="cuit" className="flex items-center gap-2">
+            <Label htmlFor="identificacionFiscal" className="flex items-center gap-2">
               <CreditCard className="w-4 h-4" />
-              CUIT/CUIL * (11 dígitos)
+              {paisConfig.idLabel} *
+              {esArgentina && <span className="text-xs text-slate-500">(11 dígitos)</span>}
             </Label>
             <div className="flex gap-2">
               <div className="relative flex-1">
                 <Input
-                  id="cuit"
-                  value={formData.cuit}
-                  onChange={handleCuitChange}
-                  placeholder="XX-XXXXXXXX-X"
+                  id="identificacionFiscal"
+                  value={formData.identificacionFiscal}
+                  onChange={handleIdChange}
+                  placeholder={paisConfig.idPlaceholder}
                   required
-                  maxLength={13}
-                  className={`h-11 pr-10 ${cuitEncontrado ? 'border-green-500 bg-green-50' :
-                    cuitNoEncontrado ? 'border-amber-500 bg-amber-50' :
-                      errorCuit ? 'border-red-500' : ''
+                  maxLength={esArgentina ? 13 : 30}
+                  className={`h-11 pr-10 ${idEncontrado ? 'border-green-500 bg-green-50' :
+                    idNoEncontrado ? 'border-amber-500 bg-amber-50' :
+                      errorId ? 'border-red-500' : ''
                     }`}
                 />
-                {cuitEncontrado && (
+                {idEncontrado && (
                   <CheckCircle2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-green-600" />
                 )}
-                {buscandoCuit && (
+                {buscandoId && (
                   <Loader2 className="absolute right-3 top-1/2 -translate-y-1/2 w-5 h-5 text-blue-600 animate-spin" />
                 )}
               </div>
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBuscarPorCuit}
-                disabled={buscandoCuit || formData.cuit.replace(/\D/g, '').length < 11}
-                className="h-11 px-4"
-              >
-                {buscandoCuit ? (
-                  <Loader2 className="w-4 h-4 animate-spin" />
-                ) : (
-                  <>
-                    <Search className="w-4 h-4 mr-2" />
-                    Buscar
-                  </>
-                )}
-              </Button>
+              {esArgentina && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBuscarPorId}
+                  disabled={buscandoId || formData.identificacionFiscal.replace(/\D/g, '').length < 11}
+                  className="h-11 px-4"
+                >
+                  {buscandoId ? (
+                    <Loader2 className="w-4 h-4 animate-spin" />
+                  ) : (
+                    <>
+                      <Search className="w-4 h-4 mr-2" />
+                      Buscar
+                    </>
+                  )}
+                </Button>
+              )}
             </div>
 
             {/* Mensajes de estado */}
-            {cuitEncontrado && (
+            {idEncontrado && (
               <Alert className="bg-green-50 border-green-200 py-2">
                 <CheckCircle2 className="h-4 w-4 text-green-600" />
                 <AlertDescription className="text-green-700 text-sm">
@@ -226,26 +302,27 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
               </Alert>
             )}
 
-            {cuitNoEncontrado && (
+            {idNoEncontrado && (
               <Alert className="bg-amber-50 border-amber-200 py-2">
                 <AlertCircle className="h-4 w-4 text-amber-600" />
                 <AlertDescription className="text-amber-700 text-sm">
-                  <span className="font-medium">CUIT no encontrado</span> en nuestros registros.
+                  <span className="font-medium">{paisConfig.idLabel} no encontrado</span> en nuestros registros.
                   Por favor, complete los datos manualmente.
                 </AlertDescription>
               </Alert>
             )}
 
-            {errorCuit && (
+            {errorId && (
               <p className="text-sm text-red-600 flex items-center gap-1">
                 <AlertCircle className="w-4 h-4" />
-                {errorCuit}
+                {errorId}
               </p>
             )}
 
             <p className="text-xs text-slate-500">
-              El CUIT se utilizará para realizar un análisis más profundo y preciso.
-              Puede editar cualquier campo después de la búsqueda.
+              {esArgentina
+                ? 'El CUIT se utilizará para realizar un análisis más profundo y preciso. Puede editar cualquier campo después de la búsqueda.'
+                : 'El identificador fiscal se utilizará para el análisis de la empresa.'}
             </p>
           </div>
 
@@ -262,7 +339,7 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
                 onChange={(e) => handleChange('nombre', e.target.value)}
                 placeholder="Ej: Grupo Constructor del Sur S.A."
                 required
-                className={`h-11 ${cuitEncontrado && formData.nombre ? 'bg-blue-50 border-blue-300' : ''}`}
+                className={`h-11 ${idEncontrado && formData.nombre ? 'bg-blue-50 border-blue-300' : ''}`}
               />
             </div>
             <div className="space-y-2">
@@ -276,96 +353,56 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
                 onChange={(e) => handleChange('sector', e.target.value)}
                 placeholder="Ej: Ingeniería y Construcción"
                 required
-                className={`h-11 ${cuitEncontrado && formData.sector ? 'bg-blue-50 border-blue-300' : ''}`}
+                className={`h-11 ${idEncontrado && formData.sector ? 'bg-blue-50 border-blue-300' : ''}`}
               />
             </div>
           </div>
 
-          {/* País y Empleados */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="pais" className="flex items-center gap-2">
-                <MapPin className="w-4 h-4" />
-                País de Operación *
-              </Label>
-              <Input
-                id="pais"
-                value={formData.pais}
-                onChange={(e) => handleChange('pais', e.target.value)}
-                placeholder="Ej: Argentina"
-                required
-                className={`h-11 ${cuitEncontrado && formData.pais ? 'bg-blue-50 border-blue-300' : ''}`}
+          {/* Sitio Web - Obligatorio con opción "No tiene web" */}
+          <div className="space-y-2">
+            <Label htmlFor="sitioWeb" className="flex items-center gap-2">
+              <Globe className="w-4 h-4" />
+              Sitio Web *
+            </Label>
+            <Input
+              id="sitioWeb"
+              type="url"
+              value={formData.sitioWeb}
+              onChange={(e) => handleChange('sitioWeb', e.target.value)}
+              placeholder="https://www.ejemplo.com"
+              required={!formData.sinSitioWeb}
+              disabled={formData.sinSitioWeb}
+              className={`h-11 ${formData.sinSitioWeb ? 'bg-slate-100 text-slate-400' : ''}`}
+            />
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="sinSitioWeb"
+                checked={formData.sinSitioWeb}
+                onCheckedChange={(checked) => {
+                  handleChange('sinSitioWeb', checked === true);
+                  if (checked) {
+                    handleChange('sitioWeb', '');
+                  }
+                }}
               />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="empleados" className="flex items-center gap-2">
-                <Users className="w-4 h-4" />
-                Número de Empleados
-                {cuitEncontrado && formData.empleados && (
-                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Auto
-                  </Badge>
-                )}
+              <Label
+                htmlFor="sinSitioWeb"
+                className="text-sm text-slate-600 cursor-pointer"
+              >
+                La empresa no cuenta con sitio web
               </Label>
-              <Input
-                id="empleados"
-                value={formData.empleados}
-                onChange={(e) => handleChange('empleados', e.target.value)}
-                placeholder="Ej: 12,500"
-                className={`h-11 ${cuitEncontrado && formData.empleados ? 'bg-blue-50 border-blue-300' : ''}`}
-              />
-              {cuitEncontrado && formData.empleados && (
-                <p className="text-xs text-slate-500 flex items-center gap-1">
-                  <Edit3 className="w-3 h-3" />
-                  Puede editar este valor si es incorrecto
-                </p>
-              )}
             </div>
+            <p className="text-xs text-slate-500">
+              El sitio web ayuda significativamente a la IA a realizar un análisis más preciso y evitar confusiones con empresas homónimas.
+            </p>
           </div>
 
-          {/* Fecha de Fundación y Sitio Web */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="fechaFundacion" className="flex items-center gap-2">
-                <Calendar className="w-4 h-4" />
-                Año de Fundación
-                {cuitEncontrado && formData.fechaFundacion && (
-                  <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
-                    <Sparkles className="w-3 h-3 mr-1" />
-                    Auto
-                  </Badge>
-                )}
-              </Label>
-              <Input
-                id="fechaFundacion"
-                value={formData.fechaFundacion}
-                onChange={(e) => handleChange('fechaFundacion', e.target.value)}
-                placeholder="Ej: 1987"
-                className={`h-11 ${cuitEncontrado && formData.fechaFundacion ? 'bg-blue-50 border-blue-300' : ''}`}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="sitioWeb" className="flex items-center gap-2">
-                <Globe className="w-4 h-4" />
-                Sitio Web
-              </Label>
-              <Input
-                id="sitioWeb"
-                type="url"
-                value={formData.sitioWeb}
-                onChange={(e) => handleChange('sitioWeb', e.target.value)}
-                placeholder="https://www.ejemplo.com"
-                className="h-11"
-              />
-            </div>
-          </div>
-
-          {/* Descripción */}
+          {/* Descripción - Opcional */}
           <div className="space-y-2">
             <Label htmlFor="descripcion" className="flex items-center gap-2">
               Descripción de la Empresa
-              {cuitEncontrado && formData.descripcion && (
+              <span className="text-xs text-slate-400">(opcional)</span>
+              {idEncontrado && formData.descripcion && (
                 <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
                   <Sparkles className="w-3 h-3 mr-1" />
                   Auto
@@ -378,9 +415,9 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
               onChange={(e) => handleChange('descripcion', e.target.value)}
               placeholder="Describa brevemente la actividad principal de la empresa..."
               rows={4}
-              className={`resize-none ${cuitEncontrado && formData.descripcion ? 'bg-blue-50 border-blue-300' : ''}`}
+              className={`resize-none ${idEncontrado && formData.descripcion ? 'bg-blue-50 border-blue-300' : ''}`}
             />
-            {cuitEncontrado && formData.descripcion && (
+            {idEncontrado && formData.descripcion && (
               <p className="text-xs text-slate-500 flex items-center gap-1">
                 <Edit3 className="w-3 h-3" />
                 Puede editar esta descripción si es necesario

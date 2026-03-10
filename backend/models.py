@@ -4,13 +4,12 @@ from typing import List, Optional, Literal
 class EmpresaData(BaseModel):
     nombre: str
     tipo: Literal['publica', 'privada']
-    cuit: str
+    identificacionFiscal: str
     sector: str
     pais: str
-    fechaFundacion: str
-    empleados: str
     sitioWeb: str
-    descripcion: str
+    sinSitioWeb: bool = False
+    descripcion: str = ""
 
 class DatosEmpresaEnriquecidos(BaseModel):
     empleados: str = Field(description="Rango o número estimado de empleados")

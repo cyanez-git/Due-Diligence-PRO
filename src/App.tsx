@@ -43,6 +43,9 @@ function App() {
 
   const informeRef = useRef<HTMLDivElement>(null);
 
+  // Helper para mostrar la etiqueta de ID según el país
+  const getIdLabel = (pais: string) => pais === 'Argentina' ? 'CUIT' : 'ID Fiscal';
+
   const handleEmpresaSubmit = async (data: EmpresaData) => {
     setEmpresa(data);
     setCurrentStep('research');
@@ -59,7 +62,7 @@ function App() {
     }
   };
 
-  const handleBuscarPorCuit = async (cuit: string) => {
+  const handleBuscarPorId = async (cuit: string) => {
     return await buscarPorCuit(cuit);
   };
 
@@ -189,7 +192,7 @@ function App() {
             <div className="flex items-center gap-3">
               <Badge variant="outline" className="hidden sm:flex items-center gap-1">
                 <CreditCard className="w-3 h-3" />
-                CUIT Integrado
+                Identificación Fiscal
               </Badge>
               {currentStep !== 'form' && (
                 <Button
@@ -220,13 +223,13 @@ function App() {
               </h2>
               <p className="text-slate-600 max-w-2xl mx-auto">
                 Realice análisis completos de empresas públicas y privadas.
-                Ingrese el <strong>CUIT</strong> para autocompletar datos y obtener un análisis más preciso.
+                Seleccione el <strong>país</strong> e ingrese la <strong>identificación fiscal</strong> para obtener un análisis preciso.
               </p>
             </div>
             <EmpresaForm
               onSubmit={handleEmpresaSubmit}
               loading={loadingResearch}
-              onBuscarPorCuit={handleBuscarPorCuit}
+              onBuscarPorCuit={handleBuscarPorId}
             />
           </div>
         )}
@@ -251,7 +254,7 @@ function App() {
                 <div className="flex items-center gap-2 mt-1">
                   <Badge variant="outline" className="text-xs">
                     <CreditCard className="w-3 h-3 mr-1" />
-                    CUIT: {empresa.cuit}
+                    {getIdLabel(empresa.pais)}: {empresa.identificacionFiscal}
                   </Badge>
                   <span className="text-slate-600 text-sm">
                     {empresa.tipo === 'publica' ? 'Empresa Pública' : 'Empresa Privada'} • {empresa.sector}
@@ -309,7 +312,7 @@ function App() {
                   </p>
                   <Badge variant="outline" className="text-xs">
                     <CreditCard className="w-3 h-3 mr-1" />
-                    {informe.empresa.cuit}
+                    {getIdLabel(informe.empresa.pais)}: {informe.empresa.identificacionFiscal}
                   </Badge>
                 </div>
               </div>
@@ -393,7 +396,7 @@ function App() {
                           </p>
                           <Badge variant="outline" className="mt-2">
                             <CreditCard className="w-3 h-3 mr-1" />
-                            CUIT: {informe.empresa.cuit}
+                            {getIdLabel(informe.empresa.pais)}: {informe.empresa.identificacionFiscal}
                           </Badge>
                         </div>
 
@@ -406,8 +409,8 @@ function App() {
                             </h4>
                             <div className="grid grid-cols-2 gap-4 bg-slate-50 p-4 rounded-lg">
                               <div>
-                                <p className="text-sm text-slate-500">CUIT</p>
-                                <p className="font-medium">{informe.empresa.cuit}</p>
+                                <p className="text-sm text-slate-500">{getIdLabel(informe.empresa.pais)}</p>
+                                <p className="font-medium">{informe.empresa.identificacionFiscal}</p>
                               </div>
                               <div>
                                 <p className="text-sm text-slate-500">Tipo</p>
@@ -420,14 +423,6 @@ function App() {
                               <div>
                                 <p className="text-sm text-slate-500">País</p>
                                 <p className="font-medium">{informe.empresa.pais}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-slate-500">Empleados</p>
-                                <p className="font-medium">{informe.empresa.empleados || 'N/A'}</p>
-                              </div>
-                              <div>
-                                <p className="text-sm text-slate-500">Año de Fundación</p>
-                                <p className="font-medium">{informe.empresa.fechaFundacion || 'N/A'}</p>
                               </div>
                             </div>
                           </div>
@@ -511,7 +506,7 @@ function App() {
             <div className="flex items-center gap-4 text-sm text-slate-500">
               <span className="flex items-center gap-1">
                 <CreditCard className="w-4 h-4" />
-                Análisis por CUIT
+                Análisis por ID Fiscal
               </span>
               <span className="flex items-center gap-1">
                 <TrendingUp className="w-4 h-4" />

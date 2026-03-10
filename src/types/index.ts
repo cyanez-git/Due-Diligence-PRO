@@ -1,12 +1,11 @@
 export interface EmpresaData {
   nombre: string;
   tipo: 'publica' | 'privada';
-  cuit: string;
+  identificacionFiscal: string;
   sector: string;
   pais: string;
-  fechaFundacion: string;
-  empleados: string;
   sitioWeb: string;
+  sinSitioWeb: boolean;
   descripcion: string;
 }
 

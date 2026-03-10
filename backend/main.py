@@ -46,15 +46,15 @@ class AnalyzeRequest(BaseModel):
     empresa: EmpresaData
     research: ResearchData
 
-@app.get("/api/empresas/{cuit}", response_model=DatosEmpresaEnriquecidos)
-async def get_empresa_bursatil(cuit: str):
+@app.get("/api/empresas/{tax_id}", response_model=DatosEmpresaEnriquecidos)
+async def get_empresa_bursatil(tax_id: str):
     """
-    Simulación de Base de Datos inicial u Oráculo para comprobar si un CUIT existe
+    Simulación de Base de Datos inicial u Oráculo para comprobar si un ID fiscal existe
     antes del inicio de la costosa o lenta investigación (IA).
-    En un entorno productivo real, esto golpearía a la API de Nosis/AFIP.
+    En un entorno productivo real, esto golpearía a la API de Nosis/AFIP u otros registros según el país.
     """
-    if not cuit or len(cuit) < 11:
-        raise HTTPException(status_code=404, detail="CUIT no encontrado o inválido.")
+    if not tax_id or len(tax_id.replace('-', '').replace('.', '')) < 8:
+        raise HTTPException(status_code=404, detail="Identificación fiscal no encontrada o inválida.")
     
     # Para fines de demostración sin conectar a AFIP real por cuota/precio:
     # Retornamos unos datos básicos base (solo como stub para evitar que la app explote si lo busca).
@@ -73,14 +73,12 @@ async def run_ai_deep_research(request: ResearchRequest):
     Inicia el Agente Investigador. Gemini buscará en la red y formateará el ResearchData.
     Este paso puede demorar entre 10 y 25 segundos dependiendo de Google Search.
     """
-    print(f"-> Petición de Deep Research recibida (POST /api/research): {request.empresa.nombre}")
+    print(f"-> Petición de Deep Research recibida (POST /api/research): {request.empresa.nombre} ({request.empresa.pais})")
     try:
         # Puesto que genai.Client() es síncrono por defecto, correremos el wrapper asíncrono básico:
         result = await asyncio.to_thread(
             investigate_company, 
-            request.empresa.cuit, 
-            request.empresa.nombre, 
-            request.empresa.sector
+            request.empresa
         )
         return result
     except Exception as e:
