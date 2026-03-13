@@ -28,6 +28,17 @@ def investigate_company(empresa: EmpresaData) -> ResearchData:
     if empresa.descripcion:
         desc_context = f"Descripción provista por el usuario: {empresa.descripcion}"
 
+    # Contexto del informe financiero cargado (opcional)
+    archivo_context = ""
+    if empresa.contextoArchivo:
+        archivo_context = f"""
+FUENTE ADICIONAL — INFORME FINANCIERO CARGADO POR EL USUARIO:
+---
+{empresa.contextoArchivo}
+---
+Utiliza esta información como fuente primaria sobre la empresa y contrástala con lo que encuentres en la búsqueda web.
+"""
+
     search_prompt = f"""
     Realiza una investigación profunda (Due Diligence Research) de la siguiente empresa:
     Nombre: {empresa.nombre}
@@ -37,6 +48,7 @@ def investigate_company(empresa: EmpresaData) -> ResearchData:
     Sector: {empresa.sector}
     {web_context}
     {desc_context}
+    {archivo_context}
 
     Busca y proporciona información reciente y veraz sobre:
     1. Noticias de mercado, reputacionales o legales recientes (con fechas y URLs).

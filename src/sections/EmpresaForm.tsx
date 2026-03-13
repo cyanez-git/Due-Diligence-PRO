@@ -26,10 +26,11 @@ import {
   CheckCircle2,
   Loader2,
   AlertCircle,
-  Edit3
-
+  Edit3,
+  FileUp,
 } from 'lucide-react';
-import type { EmpresaData, DatosEmpresaEnriquecidos } from '@/types';
+import type { EmpresaData, DatosEmpresaEnriquecidos, InformeFinancieroExtraido } from '@/types';
+import { FileUploadZone } from '@/components/FileUploadZone';
 
 const PAISES = [
   { value: 'Argentina', label: 'Argentina', idLabel: 'CUIT/CUIL', idPlaceholder: 'XX-XXXXXXXX-X', idLength: 11 },
@@ -69,6 +70,7 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
   const [idNoEncontrado, setIdNoEncontrado] = useState(false);
   const [errorId, setErrorId] = useState<string | null>(null);
   const [datosEditados, setDatosEditados] = useState(false);
+  const [archivoSubido, setArchivoSubido] = useState(false);
 
   const paisConfig = PAISES.find(p => p.value === formData.pais) || PAISES[PAISES.length - 1];
   const esArgentina = formData.pais === 'Argentina';
@@ -99,6 +101,27 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
     } else if (idEncontrado) {
       setDatosEditados(true);
     }
+  };
+
+  const handleInformeExtraido = (informe: InformeFinancieroExtraido) => {
+    // Auto-completar campos del formulario con los datos del informe
+    setFormData(prev => ({
+      ...prev,
+      nombre: informe.nombreEmpresa || prev.nombre,
+      identificacionFiscal: informe.identificacionFiscal || prev.identificacionFiscal,
+      sector: informe.sector || prev.sector,
+      tipo: informe.tipo || prev.tipo,
+      descripcion: informe.descripcion || prev.descripcion,
+      contextoArchivo: informe.textoCrudo || undefined,
+    }));
+    setArchivoSubido(true);
+    // Marcar como editables (no bloquear edición manual)
+    setIdEncontrado(false);
+  };
+
+  const handleArchivoRemovido = () => {
+    setFormData(prev => ({ ...prev, contextoArchivo: undefined }));
+    setArchivoSubido(false);
   };
 
   const handleBuscarPorId = async () => {
@@ -191,7 +214,32 @@ export function EmpresaForm({ onSubmit, loading, onBuscarPorCuit }: EmpresaFormP
           }}
           className="space-y-6"
         >
-          {/* País de Operación - PRIMER CAMPO */}
+          {/* Zona de carga de informe financiero (opcional) */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2 text-base font-semibold text-slate-600">
+              <FileUp className="w-4 h-4" />
+              Informe Financiero
+              <span className="text-xs font-normal text-slate-400">(opcional)</span>
+              {archivoSubido && (
+                <Badge variant="outline" className="text-xs bg-blue-50 text-blue-700">
+                  <Sparkles className="w-3 h-3 mr-1" />
+                  Fuente incluida en el análisis
+                </Badge>
+              )}
+            </Label>
+            <p className="text-xs text-slate-500">
+              Podés subir un informe NOSIS, Veraz, SERASA o equivalente. La IA leerá el archivo,
+              completará los campos del formulario automáticamente y lo usará como fuente primaria en el análisis.
+            </p>
+            <FileUploadZone
+              pais={formData.pais}
+              onInformeExtraido={handleInformeExtraido}
+              onRemove={handleArchivoRemovido}
+            />
+          </div>
+
+          <div className="border-t border-slate-100" />
+
           <div className="space-y-2">
             <Label htmlFor="pais" className="flex items-center gap-2 text-base font-semibold">
               <MapPin className="w-4 h-4" />

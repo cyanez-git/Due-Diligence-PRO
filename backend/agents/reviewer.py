@@ -19,6 +19,11 @@ def analyze_and_score(empresa: EmpresaData, research: ResearchData) -> Resultado
 
     DATOS DE RESEARCH RECOPILADOS:
     {research.model_dump_json(indent=2)}
+    {f"""
+    INFORME FINANCIERO CARGADO POR EL USUARIO (fuente primaria — considera estos datos con ALTA PRIORIDAD):
+    ---
+    {empresa.contextoArchivo}
+    ---""" if empresa.contextoArchivo else ""}
 
     TU TAREA:
     1. Lee cuidadosamente todo el research JSON aportado.

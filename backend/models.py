@@ -10,6 +10,24 @@ class EmpresaData(BaseModel):
     sitioWeb: str
     sinSitioWeb: bool = False
     descripcion: str = ""
+    contextoArchivo: Optional[str] = None  # Texto extraído del informe financiero subido
+
+class InformeFinancieroExtraido(BaseModel):
+    """Datos estructurados extraídos por IA de un informe financiero (NOSIS, Veraz, SERASA, etc.)"""
+    nombreEmpresa: Optional[str] = Field(None, description="Nombre de la empresa según el informe")
+    identificacionFiscal: Optional[str] = Field(None, description="CUIT, CNPJ, RUT u otro ID fiscal encontrado")
+    sector: Optional[str] = Field(None, description="Sector o industria de la empresa")
+    tipo: Optional[Literal['publica', 'privada']] = Field(None, description="Tipo de empresa")
+    descripcion: Optional[str] = Field(None, description="Descripción o actividad principal de la empresa")
+    ingresos: Optional[str] = Field(None, description="Ingresos o facturación registrada")
+    ebitda: Optional[str] = Field(None, description="EBITDA si está disponible")
+    deuda: Optional[str] = Field(None, description="Deuda total registrada")
+    ratioDeudaCapital: Optional[str] = Field(None, description="Ratio deuda/capital si está disponible")
+    beneficioNeto: Optional[str] = Field(None, description="Beneficio o resultado neto")
+    calificacionRiesgo: Optional[str] = Field(None, description="Score o calificación de riesgo crediticio del informe (ej: A, B, Alto, Medio)")
+    alertas: List[str] = Field(default_factory=list, description="Alertas, inhabilidades, juicios, protestos u observaciones negativas detectadas")
+    textoCrudo: Optional[str] = Field(None, description="Texto completo del informe (se usa como contexto en los agentes)")
+
 
 class DatosEmpresaEnriquecidos(BaseModel):
     empleados: str = Field(description="Rango o número estimado de empleados")

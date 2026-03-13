@@ -7,7 +7,25 @@ export interface EmpresaData {
   sitioWeb: string;
   sinSitioWeb: boolean;
   descripcion: string;
+  contextoArchivo?: string; // Texto extraído del informe financiero (opcional)
 }
+
+export interface InformeFinancieroExtraido {
+  nombreEmpresa?: string;
+  identificacionFiscal?: string;
+  sector?: string;
+  tipo?: 'publica' | 'privada';
+  descripcion?: string;
+  ingresos?: string;
+  ebitda?: string;
+  deuda?: string;
+  ratioDeudaCapital?: string;
+  beneficioNeto?: string;
+  calificacionRiesgo?: string;
+  alertas: string[];
+  textoCrudo?: string;
+}
+
 
 export interface ResearchData {
   noticias: Noticia[];
