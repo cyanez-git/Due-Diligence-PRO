@@ -4,7 +4,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { Badge } from '@/components/ui/badge';
 import type { InformeFinancieroExtraido } from '@/types';
 
-const API_BASE = import.meta.env.VITE_API_URL || 'http://localhost:8000';
+// Si existe VITE_API_URL y termina en /api, se lo quitamos para que API_BASE sea la raíz
+const API_BASE = (import.meta.env.VITE_API_URL || 'http://localhost:8000').replace(/\/api\/?$/, '');
 const ACCEPTED_TYPES = ['.pdf', '.html', '.htm', '.txt'];
 const MAX_SIZE_MB = 5;
 
